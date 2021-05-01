@@ -3,17 +3,9 @@
 
 // Global variables --------------------------------
 
-bool is_game_on = false;
-
 bool is_motor_activated = false; // para lançar bola
-bool ldr_status = true;
 
-bool lazer_to_verify_ball = true;
-
-bool bypassed_ldrs[3] = {true, true, true};
-
-// bool lazers_goal[3] = {false, false, false};
-// bool leds_points[3] = {false, false, false};
+bool bypassed_ldrs[3] = {false, false, false};
 
 unsigned int score = 0;
 
@@ -39,16 +31,26 @@ unsigned int score = 0;
 // Global functions --------------------------------
 
 void check_ldrs () {
-  bypassed_ldrs[0] = get_ldr1();
-  bypassed_ldrs[1] = get_ldr2();
-  bypassed_ldrs[2] = get_ldr3();
+  bool ldr1 = get_ldr1();
+  bool ldr2 = get_ldr2();
+  bool ldr3 = get_ldr3();
+  if (
+    ldr1 && !bypassed_ldrs[0] ||
+    ldr2 && !bypassed_ldrs[1] ||
+    ldr3 && !bypassed_ldrs[2]
+  ) {
+    add_score();
+  }
+  bypassed_ldrs[0] |= ldr1;
+  bypassed_ldrs[1] |= ldr2;
+  bypassed_ldrs[2] |= ldr3;
 }
 
 bool is_game_over () {
   bool is_it = true;
   for (int i = 0; i < sizeof(bypassed_ldrs); i++) {
     bool val = bypassed_ldrs[i];
-    is_it = is_it && bypassed_ldrs[i] && val;
+    is_it &= val;
   }
   return is_it;
 }
@@ -69,7 +71,7 @@ void loop(void) {
 
   check_ldrs();
   if (is_game_over()) {
-    add_score();
+    release_ball(); // release another ball
   }
 
 }
