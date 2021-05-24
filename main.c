@@ -1,11 +1,14 @@
 #include <__cross_studio_io.h>
-#include <stdbool.h> 
+#include <stdbool.h>
+#include "gpio/gpio.h"
 
 // Global variables --------------------------------
 
 bool is_motor_activated = false; // para lançar bola
 
 bool bypassed_ldrs[3] = {false, false, false};
+
+bool teste;
 
 unsigned int score = 0;
 
@@ -17,9 +20,9 @@ unsigned int score = 0;
 
 #define get_value_at_pin(pin) (false)
 
-#define get_ldr1() (get_value_at_pin(1))
-#define get_ldr2() (get_value_at_pin(2))
-#define get_ldr3() (get_value_at_pin(3))
+#define get_ldr1() (gpio_pin_read(GPIOB, 13))
+#define get_ldr2() (gpio_pin_read(GPIOB, 14))
+#define get_ldr3() (gpio_pin_read(GPIOB, 15))
 
 #define get_button_start_game() (get_value_at_pin(4))
 
@@ -34,6 +37,7 @@ void check_ldrs () {
   bool ldr1 = get_ldr1();
   bool ldr2 = get_ldr2();
   bool ldr3 = get_ldr3();
+
   if (
     ldr1 && !bypassed_ldrs[0] ||
     ldr2 && !bypassed_ldrs[1] ||
@@ -59,6 +63,10 @@ void release_ball () {
     is_motor_activated = true;
 }
 
+void game_over () {
+  gpio_pin_write(GPIOB, 12, 0);
+}
+
 void awaitGameStart () {
   bool button_start = get_button_start_game();
   while (true) if (button_start) {
@@ -71,14 +79,28 @@ void loop(void) {
 
   check_ldrs();
   if (is_game_over()) {
+    game_over();
     release_ball(); // release another ball
   }
 
 }
 
+void configure () {
+  gpio_init();
+  gpio_pin_mode(GPIOB, 12, gpio_mode_output_PP_10MHz);
+  gpio_pin_mode(GPIOB, 13, gpio_mode_input_pupd);
+  gpio_pin_mode(GPIOB, 14, gpio_mode_input_pupd);
+  gpio_pin_mode(GPIOB, 15, gpio_mode_input_pupd);
+
+  gpio_pin_write(GPIOB, 13, 0);
+  gpio_pin_write(GPIOB, 14, 0);
+  gpio_pin_write(GPIOB, 15, 0);
+}
+
 void main(void)
 {
 
+  configure();
   debug_printf("hello world\n");
   awaitGameStart();
   while (1) loop();

@@ -1,4 +1,5 @@
 "Projeto pin ball THUMB Debug/main.o"
+"Projeto pin ball THUMB Debug/gpio.o"
 "Projeto pin ball THUMB Debug/thumb_crt0.o"
 "Projeto pin ball THUMB Debug/STM32_Startup.o"
 "C:/Program Files/Rowley Associates Limited/CrossWorks for ARM 4.8/lib/libm_v7m_t_le_eabi.a"
